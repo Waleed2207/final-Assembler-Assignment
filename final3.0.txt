@@ -1,0 +1,990 @@
+﻿	
+	BUN	Main
+
+// ---- Global constants ------------
+
+MINUS_ASCII_PLUS,	 	 DEC -43	// -ascii('+')
+MINUS_ASCII_MINUS,	 DEC -45	// -ascii('-')			
+MINUS_ASCII_MUL,	 	 DEC -42	// -ascii('*')
+MINUS_ASCII_DIV,	 	 DEC -47	// -ascii('/')
+MINUS_ASCII_X,		 DEC -120	// -ascii('x')
+MINUS_ASCII_BIG_X,	 DEC -88	// -ascii('X')
+MINUS_ASCII_ZERO,	 	 DEC -48	// -ascii('0')
+MINUS_ASCII_NINE,	 	 DEC -57	// -ascii('9')
+MINUS_ASCII_CR,		 DEC -13  	// -ascii(<cr>) (<cr> is when user presses ENTER)
+ASCII_CR,		       DEC 13  	// <cr> (<cr> is when user presses ENTER)
+TEN,				 DEC 10
+MINUS_ONE, 			 DEC -1
+ASCII_EQUALS,		 DEC 61
+ASCII_SPACE,	 	 DEC 32
+// ----------------------------------
+
+// Main subroutine
+Main,	LDA strTitle1_Start //AC = start of strTitle1
+				BSA PUSH
+				BSA printStr  		//Prints strTitle1
+		
+Main1,			BSA GetOperator		// AC = operator from user
+				STA Operator		// Operator = operator from user
+				LDA Operator
+				ADD MINUS_ASCII_PLUS
+				SZA					// Skip if user entered '+'
+				BUN Main2
+				BSA DoPlus
+				BUN Main20			
+
+Main2,  			LDA Operator
+				ADD MINUS_ASCII_MINUS
+				SZA					// Skip if user entered '-'
+				BUN Main3			
+				BSA DoMinus
+				BUN Main20			
+
+Main3, 			LDA Operator
+				ADD MINUS_ASCII_MUL
+				SZA					// Skip if user entered '*'
+				BUN Main5			
+				BSA DoMul
+				BUN Main20			
+
+Main5,  			LDA Operator
+				ADD MINUS_ASCII_DIV
+				SZA					// Skip if user entered '/'
+				BUN Main6			
+				BSA DoDiv
+				BUN Main20			
+
+Main6,  			LDA Operator
+				ADD MINUS_ASCII_X
+				SZA					// Skip if user entered 'x'
+				BUN Main7			
+				BUN EndProg
+		
+Main7,			LDA Operator
+				ADD MINUS_ASCII_BIG_X
+				SZA					// Skip if user entered 'X'
+				BUN Main20			
+				BUN EndProg
+		
+Main20,			LDA ASCII_CR        
+        			BSA Putc            // Print <cr> ( "\n" )
+        			BUN Main1			
+		
+				HLT
+		
+// Main Data
+Char,				DEC 97
+Operator, 			DEC 0
+X, 				DEC 8
+Y, 				DEC 3
+Sum, 				DEC 0 // sum => X + Y
+
+
+
+
+// DoPlus Subroutine
+// Hanldes user input and printing result
+DoPlus,	 		HEX	0	
+			
+// Get num1 from user
+            		LDA str1st_Start	//AC = start of str1st_Start
+				BSA PUSH
+				BSA printStr  		//Prints str1st	
+            		BSA GetInt
+				BSA POP 
+				STA DoPlus_num1   //DoPlusStatus1 = getInt() status
+				BSA POP 
+            		STA DoPlusStatus1		//DoPlus_num1 = num1 from user
+            		SZA
+				BUN DoPlusEnd		//Return because non-digit entered
+
+// Get num2 from user
+            		LDA str2nd_Start	//AC = start of str2nd_Start
+				BSA PUSH
+				BSA printStr  		//Prints str1st	
+            		BSA GetInt
+				BSA POP 
+				STA DoPlus_num2   //DoPlusStatus1 = getInt() status
+				BSA POP 
+            		STA DoPlusStatus1		//DoPlus_num2 = num2 from user
+				SZA
+				BUN DoPlusEnd		//Return because non-digit entered
+
+				LDA	ASCII_EQUALS	// ..
+				BSA Putc			// .. 
+				LDA	ASCII_SPACE		// ..
+				BSA Putc			// Prints "= "
+			
+				LDA DoPlus_num1
+				BSA PUSH
+				LDA DoPlus_num2
+				BSA PUSH
+				BSA Add				// calls Add(num1, num2)
+				BSA POP
+				STA DoPlus_Result		
+			
+				LDA DoPlus_Result		
+				BSA putSignedInt	// Prints the result
+DoPlusEnd,  		BUN	DoPlus  I
+// Subroutine DoPlus data
+DoPlus_num1, 		DEC 0
+DoPlus_num2, 		DEC 0
+DoPlusStatus1, 		DEC 0
+DoPlus_Result, 		DEC 0
+			
+			
+// DoPlus Subroutine
+// Hanldes user input and printing result
+DoMinus,	 		HEX	0	
+            
+// Get num1 from user
+				LDA str1st_Start	//AC = start of str1st_Start
+				BSA PUSH
+				BSA printStr  		//Prints str1st
+				BSA GetInt
+				BSA POP 
+				STA DoMinus_num1
+				BSA POP 
+           			STA DoMinus_Status1		//DoMinus_num1 = num1 from user
+				SZA
+				BUN DoMinusEnd		//Return because non-digit entered
+
+// Get num2 from user
+				LDA str2nd_Start	//AC = start of str2nd_Start
+				BSA PUSH
+				BSA printStr  		//Prints str2nd
+				BSA GetInt
+				BSA POP 
+				STA DoMinus_num2
+				BSA POP 
+            		STA DoMinus_Status1		//DoMinus_num2 = num2 from user
+				SZA
+				BUN DoMinusEnd		//Return because non-digit entered
+
+				LDA	ASCII_EQUALS	// ..
+				BSA Putc			// .. 
+				LDA	ASCII_SPACE		// ..
+				BSA Putc			// Prints "= "
+			
+				LDA DoMinus_num1
+				BSA PUSH
+				LDA DoMinus_num2
+				BSA PUSH
+				BSA Sub 			// calls Sub(num1, num2)
+				BSA POP
+				STA DoMinus_Result		
+			
+				LDA DoMinus_Result		
+				BSA putSignedInt	// Prints the result
+
+DoMinusEnd, 		BUN	DoMinus  I
+// Subroutine DoPlus data
+DoMinus_Status1, 		DEC 0
+DoMinus_num1,		DEC 0
+DoMinus_num2, 		DEC 0
+DoMinus_Result, 		DEC 0
+
+
+
+// DoMul Subroutine
+// Hanldes user input and printing result
+DoMul,	 		HEX	0	
+				LDA str1st_Start	//AC = start of str1st_Start
+
+// Get num1 from user
+				LDA str1st_Start	//AC = start of str1st_Start
+				BSA PUSH
+				BSA printStr  		//Prints str1st
+				BSA GetInt
+				BSA POP 
+				STA DoMul_num1
+				BSA POP 
+            		STA DoMul_Status1		//DoMul_num1 = num1 from user
+				SZA
+				BUN DoMulEnd		//Return because non-digit entered
+
+// Get num2 from user
+				LDA str2nd_Start	//AC = start of str2nd_Start
+				BSA PUSH
+				BSA printStr  		//Prints str2nd
+				BSA GetInt
+				BSA POP 
+				STA DoMul_num2
+				BSA POP 
+            		STA DoMul_Status1		//DoMul_num2 = num2 from user
+				SZA
+				BUN DoMulEnd		//Return because non-digit entered
+
+				LDA	ASCII_EQUALS	// ..
+				BSA Putc			// .. 
+				LDA	ASCII_SPACE		// ..
+				BSA Putc			// Prints "= "
+			
+				LDA DoMul_num1
+				BSA PUSH
+				LDA DoMul_num2
+				BSA PUSH
+				BSA Mul 			// calls Mul(num1, num2)
+				BSA POP
+				STA DoMul_Result		
+			
+				LDA DoMul_Result		
+				BSA putSignedInt	// Prints the result
+
+DoMulEnd,			BUN	DoMul  I
+// Subroutine DoMul data
+DoMul_Status1, 		DEC 0
+DoMul_num1, 		DEC 0
+DoMul_num2, 		DEC 0
+DoMul_Result, 		DEC 0
+
+
+// DoDiv Subroutine
+// Hanldes user input and printing result
+DoDiv,	 		HEX	0	
+				LDA str1st_Start	//AC = start of str1st_Start
+			
+// Get num1 from user
+            		BSA PUSH
+				BSA printStr  		//Prints str1st
+				BSA GetInt
+				BSA POP 
+				STA DoDiv_num1
+				BSA POP 
+            		STA DoDiv_Status1		//DoDiv_num1 = num1 from user
+				SZA
+				BUN DoDivEnd		//Return because non-digit entered
+
+// Get num2 from user
+            		LDA str2nd_Start	//AC = start of str2nd_Start
+				BSA PUSH
+				BSA printStr  		//Prints str2nd
+				BSA GetInt
+				BSA POP 
+				STA DoDiv_num2
+				BSA POP 
+            		STA DoDiv_Status1		//DoDiv_num2 = num2 from user
+				SZA
+				BUN DoDivEnd		//Return because non-digit entered
+
+// -- If num2 is 0 then print error	and exit ---
+				LDA DoDiv_num2
+				SZA
+				BUN DoDiv1
+				LDA strDivBy0_Start
+				BSA PUSH
+				BSA printStr  		//Prints strDivBy0
+				BUN	DoDiv  I		//Return to caller
+// ----------------------------------------------
+
+DoDiv1,			LDA	ASCII_EQUALS	// ..
+				BSA Putc			// .. 
+				LDA	ASCII_SPACE		// ..
+				BSA Putc			// Prints "= "
+			
+				LDA DoDiv_num1
+				BSA PUSH
+				LDA DoDiv_num2
+				BSA PUSH
+				BSA Div 			// calls Div(num1, num2)
+				BSA POP
+				STA DoDiv_Remainder
+				BSA POP
+				STA DoDiv_Result		
+
+				LDA DoDiv_Result		
+				BSA putSignedInt	// Prints the result
+
+				LDA strRemainder_Start
+				BSA PUSH
+				BSA printStr  		//Prints strRemainder (" rem= ")
+				LDA DoDiv_Remainder		
+				BSA putSignedInt	// Prints the remainder
+
+DoDivEnd,			BUN	DoDiv  I
+// Subroutine DoDiv data
+DoDiv_Status1, 		DEC 0
+DoDiv_num1, 		DEC 0
+DoDiv_num2, 		DEC 0
+DoDiv_Result, 		DEC 0
+DoDiv_Remainder, 		DEC 0
+
+
+// Getc Subroutine
+// Gets input into AC
+Getc,	 			HEX	0	
+Input_loop, 		SKI		// Skip on input received
+				BUN Input_loop
+				INP		// Input into AC
+Getc_echo, 			SKO		// Skip on output is ready
+				BUN Getc_echo
+				OUT		// Output AC to screen
+				BUN	Getc  I
+
+
+// int GetOperator() Subroutine
+// Gets operator from user.
+// User should press ENTER at end of input
+// Each input and result is:
+//  "+<cr>" --> AC = '+' 
+//  "-<cr>" --> AC = '-' 
+//  "*<cr>" --> AC = '*' 
+//  "/<cr>" --> AC = '/' 
+//  "x<cr>" --> AC = 'x' (means exit progam)
+GetOperator,    		HEX 0 				// int GetOperator() 
+				
+GetOp1,         		LDA strOp_Start  	//AC = start of strOp
+		        	BSA PUSH			//Push it 
+		        	BSA printStr  		//Prints strOp (prints "Op: ")
+
+                		BSA Getc	    	// AC = Get char from user
+				STA GetOp_Result	// GetOp_Result = char from user
+
+// Do nothing with the second char from user
+// As we ignore the <enter> key
+				BSA Getc	    	// AC = Get char from user
+				ADD MINUS_ASCII_CR	
+				SZA					// Skip if user pressed ENTER
+				BUN GetOp2
+				BUN GetOp_end
+GetOp2,        		LDA ASCII_CR        //..
+                		BSA Putc            //print "\n"
+               		BUN GetOp1        
+GetOp_end,      		LDA GetOp_Result
+				BUN GetOperator I 	// return 
+// Subroutine GetOperator data
+GetOp_Result, 		DEC 0
+
+
+// IsDigit Subroutine
+// int IsDigit(int char) 
+// Returns: 1 - char is digit   0 - char is not a digit
+IsDigit, 			HEX 0 
+				BSA POP 
+				STA IsDigit_Char  		// IsDigit_Char = char param			 
+				ADD MINUS_ASCII_ZERO	// AC = IsDigit_Char - '0'
+				SNA 					// Skip if IsDigit_Char < '0' 
+				BUN IsDigit1	
+				BUN IsDigitNot
+IsDigit1,			LDA IsDigit_Char 		// AC = char param
+				ADD MINUS_ASCII_NINE    // AC = IsDigit_Char - '9'
+				SPA				 		// Skip if IsDigit_Char > '9' 
+				BUN IsDigitYes	
+				BUN IsDigitNot
+IsDigitYes,			CLA 
+				INC
+		 		BSA PUSH 	  // PUSH(AC=1)
+		 		BUN IsDigit I // return 1
+IsDigitNot,			CLA
+		 		BSA PUSH 	  // PUSH(AC=0)
+		 		BUN IsDigit I // return 0
+// Subroutine IsDigit data
+IsDigit_Char, 		DEC 0
+
+
+
+// int GetInt() Subroutine
+// Gets string from user and returns it as int
+// also returns status (0=ok  1=error)
+// If user entered a non-digit char then
+// strNotDigit is printed and returned status is 1.
+// User should press ENTER at end of input
+// Examples:  "23" -> 23
+//            "12" -> -12
+GetInt,			HEX 0 			// int GetInt() 
+                
+               		CLA
+                		STA GetInt_Status   //GetInt_Status=0
+                		CLA
+                		STA GetInt_Result   //GetInt_Result=0 
+                		CLA
+                		STA IsNegative
+
+// --- At first check if user enters - (MINUS)	
+
+GetInt0,			BSA Getc	    	// AC = Get char from user
+				STA GetInt_Char		// GetInt_Char = char from user
+				ADD MINUS_ASCII_MINUS
+				SZA					// Skip if user entered - (MINUS)
+				BUN GetInt1a
+				CLA					// AC = 0
+				INC					// AC = 1
+				STA IsNegative		// IsNegative = 1
+
+// --- Get digits from user until ENTER is pressed
+				
+GetInt1,			BSA Getc	    	// AC = Get char from user
+				STA GetInt_Char		// GetInt_Char = char from user
+				
+GetInt1a,			LDA GetInt_Char		// AC = char from user
+				ADD MINUS_ASCII_CR	
+				SZA					// Skip if user pressed ENTER
+				BUN GetInt2	
+                		BUN GetInt_End		
+
+// --- Check if user entered non-digit char ----
+GetInt2,			LDA GetInt_Char		  // AC = char_from_user
+				BSA PUSH
+				BSA IsDigit        	 // Check if user entered a digit
+				BSA POP				// AC=0 if char is not a digit
+               		SZA					// Skip if char is not a digit
+				BUN GetInt3	
+				LDA GetInt_Char    	 // ..
+				STA strWrongChar		// strWrongChar = GetInt_Char			
+				LDA	strNotDigit_Start
+				BSA Push
+				BSA PrintStr		// print strNotDigit (includes strWrongChar) 	
+				CLA					// ..
+				INC					// ..
+				STA GetInt_Status	// GetInt_Status = 1
+				BUN GetInt_End2
+// ----------------------------------------------
+
+GetInt3,			LDA GetInt_Char		  // AC = char_from_user
+                		ADD MINUS_ASCII_ZERO  // AC = int(char_from_user) 
+				STA GetInt_Digit	// GetInt_Digit = digit_from_user
+
+				// --- GetInt_Result *= 10 ----
+				LDA GetInt_Result
+				BSA PUSH
+				LDA TEN
+				BSA PUSH
+				BSA Mul
+				BSA POP
+				STA GetInt_Result
+				// ----------------------------
+				
+				LDA	GetInt_Result   // ..
+				Add GetInt_Digit	// ..
+				STA GetInt_Result	// GetInt_Result += digit_from_user
+				BUN GetInt1
+				
+GetInt_End,			LDA IsNegative
+				SPA				   // skip if IsNegative > 0 	
+				BUN GetInt_End2
+					
+				LDA GetInt_Result  // ..
+				CMA				   // ..	
+				INC                // .. 
+				STA GetInt_Result  // GetInt_Result = -GetInt_Result
+				
+GetInt_End2,		LDA GetInt_Status
+				BSA PUSH		// PUSH(GetInt_Status);
+				LDA GetInt_Result
+				BSA PUSH 		// PUSH(GetInt_Result);
+				BUN GetInt I 	// return 
+// Subroutine GetInt data
+GetInt_Status,  		DEC 0
+IsNegative,     		DEC 0
+GetInt_Char, 		DEC 0
+GetInt_Temp1, 		DEC 0
+GetInt_Digit, 		DEC 0
+GetInt_Result, 		DEC 0
+
+
+
+// Putc Subroutine
+// Prints AC to screen
+Putc,		 		HEX 0
+Output_loop, 		SKO		// Skip on output is ready
+			 	BUN Output_loop
+			 	OUT
+			 	BUN Putc I  // Output AC to screen
+
+
+// PrintStr Subroutine
+// Print a string to screen which its
+// address is given as parameter
+PrintStr,			HEX 0
+				BSA POP    		// AC = the parameter
+				STA str_ptr
+PrintStr_loop,		LDA str_ptr I   // AC = *str_ptr
+				SPA		   		// Skip on AC > 0
+				BUN printStr_end
+				BSA Putc		// print AC as ASCII
+				LDA str_ptr     // ..
+				INC				// ..
+				STA str_ptr		// str_ptr++
+				BUN PrintStr_loop
+printStr_end, 		BUN PrintStr I  
+// Subroutine PrintStr data
+str_ptr,			DEC 0
+
+
+// Add Subroutine
+Add, 				HEX 0 // int Add(int AddA, int AddB) {
+				BSA POP //
+				STA AddB // AddB = POP(); //2nd
+				BSA POP //
+				STA AddA // Par1 = POP(); //1st parameter
+				ADD AddB //
+				BSA PUSH // PUSH(AddB + AddA);
+				BUN Add I // return 
+// Subroutine Add data
+AddA, 			DEC 0
+AddB, 			DEC 0
+		
+		
+// Substract Subroutine
+Sub, 				HEX 0 // int Sub(int a, int b) returns a-b
+				BSA POP //	AC = POP(); //2st parameter
+				CMA //
+				INC //  
+				STA Sub_NegativeB // SubNegativeB = -AC 
+				BSA POP //	Pop 1st parameter into AC
+				ADD Sub_NegativeB //
+				BSA PUSH // PUSH(SubA - SubB);
+				BUN Sub I // return 
+
+// Subroutine data
+Sub_NegativeB, 		DEC 0
+		
+		
+// Absolute Subroutine
+// Converts parameter a to positive
+Abs, 				HEX 0     // int Abs(int a) 
+				BSA POP   // ac <- a
+				SNA		  // skip if ac < 0	
+				BUN	Abs1
+				CMA 	  // Negate ac in order to..	
+				INC		  //   make it positive		
+Abs1,				BSA PUSH  // PUSH(abs(a));
+				BUN Abs I // return 
+// Subroutine Abs data
+AbsA, 			DEC 0
+		
+
+// Multiplication Subroutine
+Mul, 				HEX 0 		// int Mul(int a, int b) returns a*b
+
+        			BSA POP 	//	AC = POP(); //2st parameter (b)
+				STA MulB  	// MulB = b 
+				BSA POP 	//	AC = POP(); //1st parameter (a)
+				STA MulA  	// MulA = a 
+		
+				BSA PUSH  	// push a 		   
+				BSA Abs   	// --
+				BSA POP 	// ac <- absolute(a)
+				STA MulAbsA  // MulAbsA <- absolute(a)
+
+				LDA MulB
+				BSA PUSH	// push b 		   
+				BSA Abs   	// --
+				BSA POP   	// ac <- absolute(b)
+				STA MulAbsB // MulAbsB <- absolute(b)
+		
+// now doing: result = absolute(a) * absolute(b)
+// By doing |b| times: mulResult += |a|
+
+        			CLA           // ..
+        			STA MulResult // MulResult = 0
+
+Mul1,				LDA MulAbsB		// --
+				SPA		  		// skip if MulAbsB > 0	
+				BUN	Mul3
+				ADD MINUS_ONE  	//--
+				STA MulAbsB   	//MulAbsB-- 
+				LDA MulResult
+				ADD MulAbsA	  	// --
+				STA MulResult 	// MulResult += |a|
+				BUN Mul1	
+		
+// Now, negate result if a is negative
+// and negate result again if b is negative		
+		
+Mul3,				LDA MulA    // --
+				SNA 	    // skip if a is negative 
+				BUN Mul4
+				LDA MulResult
+				CMA
+				INC			
+				STA MulResult // MulResult = -MulResult
+Mul4,				LDA MulB    // --
+				SNA   	    // skip if b is negative 
+				BUN MulEnd
+				LDA MulResult
+				CMA
+				INC			
+				STA MulResult // MulResult = -MulResult
+MulEnd,			LDA MulResult // --
+				BSA PUSH      // PUSH(a*b);
+				BUN Mul I  // return 
+
+// Subroutine data
+MulResult, 			DEC 0
+MulA,      			DEC 0 
+MulB,      			DEC 0 
+MulAbsA,   			DEC 0  // absolute(MulA) 
+MulAbsB,   			DEC 0  // absolute(MulB) 
+
+
+// Division Subroutine
+Div, 				HEX 0 // int Div(int a, int b) returns a/b and the remainder
+				BSA POP //	AC = POP(); //2st parameter (b)
+				STA DivB  // DivB = b 
+				BSA POP //	AC = POP(); //1st parameter (a)
+				STA DivA  // DivA = a 
+		
+				BSA PUSH  // push a 		   
+				BSA Abs   // a = absolute(a)
+				BSA POP   // ac <- a
+				STA DivAbsA  // DivAbsA <- absolute(a)
+
+				LDA DivB
+				BSA PUSH  // push b 		   
+				BSA Abs   // b = absolute(b)
+				BSA POP   // ac <- b
+				STA DivAbsB  // DivAbsB <- absolute(b)
+		
+// Now doing: result = absolute(a) / absolute(b)
+// By setting DivTmp1 = absolute(DivA) and then
+// counting into DivResult: DivTmp1 -= absolute(b)
+
+				LDA DivAbsA  // --
+				STA DivTmp1  // DivTmp1 = abolute(a)	
+
+				LDA DivAbsB  // --
+				CMA          // --
+				INC          // --
+				STA DivNegB  // DivNegB = -abolute(b)	
+		
+// Ends substraction when DivTmp1 < absolute(b)		
+		
+				CLA	
+				STA DivResult // DivResult = 0
+		
+Div1,				LDA DivTmp1  // --
+				SZA	  	 	 // skip if DivTmp1 == 0
+				BUN	Div2	 // 
+				BUN	Div10	 // Goto DIV10 because DivTmp1 == 0
+Div2,				ADD DivNegB   // AC = DivTmp1 - absolute(b)
+				STA DivTmp2
+
+				LDA DivTmp2
+				SNA 		  // skip if AC < 0
+				BUN	Div3	  //
+				BUN	Div10	  // Goto Div10 because AC < 0 
+//   This means:  DivTmp1 < absolute(b)
+Div3,   			LDA DivTmp2
+				STA DivTmp1
+				LDA DivResult // --
+				INC  		  // --	
+				STA DivResult // DivResult++
+				BUN Div1
+		
+// Now, negate the absolute result if a is negative
+// and negate result again if b is negative		
+		
+Div10,			LDA DivA    // --
+				SNA 		// skip if a is negative 
+				BUN Div11  // Goto Div1 because a is not negative
+				LDA DivResult // --
+				CMA           // --
+				INC			  // --
+				STA DivResult // DivResult = -DivResult
+Div11,			LDA MulB    // --
+				SNA 	    // skip if b is negative 
+				BUN DivEnd  // Goto DivEnd because b is not negative
+Div12,  			LDA DivResult // --
+				CMA           // -- 
+				INC			  // --
+				STA DivResult // MulResult = -MulResult
+DivEnd,			LDA DivResult
+				BSA PUSH // PUSH(a/b)
+				LDA DivTmp1
+				BSA PUSH // PUSH(a%b)
+				BUN Div I // return 
+
+// Subroutine Div data
+DivResult, 			DEC 0
+DivA,      			DEC 0  // a
+DivB,      			DEC 0  // b
+DivAbsA,   			DEC 0  // = absolute(a) 
+DivAbsB,   			DEC 0  // = absolute(b)
+DivTmp1,  			DEC 0
+DivTmp2,   			DEC 0
+DivNegB,   			DEC 0  // = -absolute(b)
+
+
+// putSignedInt from solved homework
+putSignedInt, 		HEX 0 // putSignedInt(short signed int Tnum) {
+				STA Tnum //
+				LDA Power10Ptr //
+				STA Ptr // Ptr = @Power10Array
+				LDA It_count
+				STA Count // Count = It_count; i.e. 4 in the case of 16 bits
+				LDA TNum // IF (TNum <0)
+				SNA //
+				BUN Positive //
+Negative, 			LDA TNum // THEN
+				CMA // stripped = -TNum ;
+				INC //
+				STA Stripped //
+				LDA Sign_ascii //
+				BSA Putc // putc(“-“);
+				BUN ForLoop //
+				Positive, LDA TNum // ELSE stripped = TNum ;
+				STA Stripped // FI
+	//
+ForLoop,	 		LDA Count // FOR (Count= It_count; Count > 0; Count--)
+				SPA //
+				BUN EndFor //
+				CLA // DO digit =0;
+				STA Digit //
+Loop, 			LDA ptr I // WHILE (Stripped - *Ptr > 0)
+				ADD Stripped // DO
+				SNA //
+				BUN Continue //
+				BUN Outx //
+Continue, 			STA Stripped // Stripped=Stripped - *Ptr;
+				ISZ digit // digit++;
+				BUN Loop // OD;
+Outx,				LDA digit //
+				ADD ascii_Offset //
+				SZA
+				BSA Putc // Output(digit);
+				ISZ ptr // ptr++;
+				LDA count // Count--;
+				ADD MINUS_ONE //
+				STA Count //
+				BUN ForLoop // OD;
+EndFor, 			LDA Stripped //
+				ADD ascii_Offset //
+				BSA Putc // Output(last digit); // print units – the left over in ACC
+End,				BUN putSignedInt I // return; }
+	//
+	// putSignedInt data
+TNum, 			DEC 0 // Temp for output
+digit, 			DEC 0
+Sign_ascii, 		HEX 2D // the "-" character
+ascii_Offset, 		HEX 30 // digit to ascii representation offset
+Stripped, 			DEC 0 // +ve value of TNum
+	//
+count, 			DEC 0
+It_count, 			DEC 4 // loop count (for 16 bit integer)
+Power10Ptr, 		HEX 950 // @Power10Array
+ptr, HEX 0 //
+	//
+	
+
+// Stack operation Push
+POP,				HEX 0 // AC POP() {
+				LDA SPtr // SPtr--;
+				ADD MINUS_ONE1 //
+				STA SPtr //
+				LDA SPtr I // AC = *SPtr;
+				BUN POP I // return }
+
+// Stack operation POP
+PUSH, 			HEX 0 // PUSH(AC) {
+				STA SPtr I // *SPtr = AC;
+				ISZ SPtr // SPtr++;
+				BUN PUSH I // return }
+
+// Stack data
+SPtr, 			HEX 400
+MINUS_ONE1,			DEC -1
+				ORG 400
+Stack,  			DEC 0 // allocate 6 locations for Stack
+				DEC 0
+				DEC 0
+				DEC 0
+				DEC 0
+				DEC 0
+StackTop, 			DEC 0
+
+// Global strings to print		
+strTitle1_Start, 		HEX 500	//strTitle1_Start = start address of strTitle1
+strOp_Start,  		HEX 600	 	//strOp_Start = start address of strOp
+strBye_Start, 		HEX 650	 	//strBye_Start = start address of strBye
+str1st_Start, 		HEX 700		//str1st_Start = start address of str1st_Start
+str2nd_Start, 		HEX 750		//str2nd_Start = start address of str2nd_Start		
+strDivBy0_Start, 		HEX 800	//strDivBy0_Start = start address of strDivBy0		 
+strNotDigit_Start,	Hex 850  //strNotDigit_Start = start address of strNotDigit_Start
+strRemainder_Start, 	HEX 900	//strRemainder_Start = start address of strRemainder		 
+
+				ORG 500
+// strTitle1 = "Input is terminated by <Enter>.\n"
+//             "To exit program type X for Op.\n\n"
+strTitle1,			DEC 73
+				DEC 110
+				DEC 112
+				DEC 117
+				DEC 116
+				DEC 32
+				DEC 105
+				DEC 115
+				DEC 32
+				DEC 116
+				DEC 101
+				DEC 114
+				DEC 109
+				DEC 105
+				DEC 110
+				DEC 97
+				DEC 116
+				DEC 101
+				DEC 100
+				DEC 32
+				DEC 98
+				DEC 121
+				DEC 32
+				DEC 60
+				DEC 69
+				DEC 110
+				DEC 116
+				DEC 101
+				DEC 114
+				DEC 62
+				DEC 46
+				DEC 13	// New line
+
+				DEC 84
+				DEC 111
+				DEC 32
+				DEC 101
+				DEC 120
+				DEC 105
+				DEC 116
+				DEC 32
+				DEC 112
+				DEC 114
+				DEC 111
+				DEC 103
+				DEC 114
+				DEC 97
+				DEC 109
+				DEC 32
+				DEC 116
+				DEC 121
+				DEC 112
+				DEC 101
+				DEC 32
+				DEC 88
+				DEC 32
+				DEC 102
+				DEC 111
+				DEC 114
+				DEC 32
+				DEC 79
+				DEC 112
+				DEC 46		
+				DEC 13	// New line
+				DEC 13	// New line
+				HEX 0	// End of string
+			
+
+
+				ORG 600
+strOp, 			DEC 79
+				DEC 112
+				DEC 58
+				DEC 32	
+				HEX 0	// End of string
+
+				ORG 650		
+strBye,			DEC 66
+				DEC 121
+				DEC 101
+				HEX 0	// End of string
+
+				ORG 700
+str1st,			DEC 49
+				DEC 115
+				DEC 116
+				DEC 58
+				DEC 32
+				HEX 0	// End of string
+		
+				ORG 750
+str2nd,			DEC 50
+				DEC 110
+				DEC 100
+				DEC 58
+				DEC 32
+				HEX 0	// End of string
+
+
+// strDivBy0 = "Error: division by 0!\n"
+				ORG 800
+strDivBy0, 			DEC 69
+				DEC 114
+				DEC 114
+				DEC 111
+				DEC 114
+				DEC 58
+				DEC 32
+				DEC 100
+				DEC 105
+				DEC 118
+				DEC 105
+				DEC 115
+				DEC 105
+				DEC 111
+				DEC 110
+				DEC 32
+				DEC 98
+				DEC 121
+				DEC 32
+				DEC 48
+				DEC 33
+				DEC 13	// New line
+				DEC 0	// End of string
+	
+
+//strNotDigit = Error: a is not a digit! 
+//  strWrongChar (now 'a') should be replaced before printing
+	ORG 850
+strNotDigit, 		DEC 13	// New line
+            		DEC 69
+				DEC 114
+				DEC 114
+				DEC 111
+				DEC 114
+				DEC 58
+				DEC 32
+strWrongChar, 		DEC 97  // a char in strNotDigit (place holder)
+				DEC 32
+				DEC 105
+				DEC 115
+				DEC 32
+				DEC 110
+				DEC 111
+				DEC 116
+				DEC 32
+				DEC 97
+				DEC 32
+				DEC 100
+				DEC 105
+				DEC 103
+				DEC 105
+				DEC 116
+				DEC 33
+				DEC 0	// End of string
+
+				ORG 900
+strRemainder, 		DEC 32
+			  	DEC 114
+    		  		DEC 101
+			  	DEC 109
+			  	DEC 61
+			  	DEC 32
+			  	DEC 0	// End of string
+
+				ORG 950
+Power10Array, 		DEC -10000 // -10 to power of 4
+			  	DEC -1000 // -10 to power of 3
+			  	DEC -100 // -10 to power of 2
+			  	DEC -10 // -10 to power of 1
+
+
+EndProg,			LDA strBye_Start //AC = start of strBye
+				BSA PUSH
+				BSA printStr  		//Prints strTitle1 		
+				HLT
+			
+				END	
+					
+			
+		
+		
